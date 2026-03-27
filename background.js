@@ -3,28 +3,28 @@
 // Context menu
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'postsnap-element',
-    title: 'PostSnap this element',
-    contexts: ['all']
+    id: "postsnap-element",
+    title: "PostSnap this element",
+    contexts: ["all"],
   });
   chrome.contextMenus.create({
-    id: 'postsnap-page',
-    title: 'PostSnap full page',
-    contexts: ['all']
+    id: "postsnap-page",
+    title: "PostSnap full page",
+    contexts: ["all"],
   });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
-  if (info.menuItemId === 'postsnap-element') {
-    await injectAndSend(tab.id, { action: 'startElementSelector' });
-  } else if (info.menuItemId === 'postsnap-page') {
+  if (info.menuItemId === "postsnap-element") {
+    await injectAndSend(tab.id, { action: "startElementSelector" });
+  } else if (info.menuItemId === "postsnap-page") {
     await captureFullPage();
   }
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  if (command === 'take-screenshot') {
+  if (command === "take-screenshot") {
     captureVisibleTab();
   }
 });
@@ -36,16 +36,16 @@ async function injectAndSend(tabId, message) {
     try {
       await chrome.scripting.executeScript({
         target: { tabId },
-        files: ['content/selector.js']
+        files: ["content/selector.js"],
       });
       await chrome.scripting.insertCSS({
         target: { tabId },
-        files: ['content/selector.css']
+        files: ["content/selector.css"],
       });
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise((r) => setTimeout(r, 150));
       await chrome.tabs.sendMessage(tabId, message);
     } catch (err) {
-      console.warn('PostSnap: Cannot inject into this page', err);
+      console.warn("PostSnap: Cannot inject into this page", err);
     }
   }
 }
@@ -65,12 +65,18 @@ async function captureFullPage() {
       viewportHeight: window.innerHeight,
       devicePixelRatio: window.devicePixelRatio || 1,
       originalScrollX: window.scrollX,
-      originalScrollY: window.scrollY
-    })
+      originalScrollY: window.scrollY,
+    }),
   });
 
   const dims = result.result;
-  const { scrollWidth, scrollHeight, viewportWidth, viewportHeight, devicePixelRatio } = dims;
+  const {
+    scrollWidth,
+    scrollHeight,
+    viewportWidth,
+    viewportHeight,
+    devicePixelRatio,
+  } = dims;
   const capW = viewportWidth * devicePixelRatio;
   const capH = viewportHeight * devicePixelRatio;
 
@@ -93,14 +99,14 @@ async function captureFullPage() {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: (y) => window.scrollTo(0, y),
-      args: [scrollY]
+      args: [scrollY],
     });
 
-    // Wait for scroll + repaint
-    await new Promise(r => setTimeout(r, 250));
+    // Wait for scroll + repaint (Chrome limits captureVisibleTab to ~2/sec)
+    await new Promise((r) => setTimeout(r, 600));
 
     const dataUrl = await new Promise((resolve) => {
-      chrome.tabs.captureVisibleTab(null, { format: 'png' }, (url) => {
+      chrome.tabs.captureVisibleTab(null, { format: "png" }, (url) => {
         resolve(url);
       });
     });
@@ -108,7 +114,7 @@ async function captureFullPage() {
     captures.push({
       dataUrl,
       scrollY: scrollY * devicePixelRatio,
-      isLast: i === rows - 1
+      isLast: i === rows - 1,
     });
   }
 
@@ -116,7 +122,7 @@ async function captureFullPage() {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: (x, y) => window.scrollTo(x, y),
-    args: [dims.originalScrollX, dims.originalScrollY]
+    args: [dims.originalScrollX, dims.originalScrollY],
   });
 
   // Stitch in an offscreen canvas via the content script
@@ -124,10 +130,10 @@ async function captureFullPage() {
     target: { tabId: tab.id },
     func: (captures, totalW, totalH, capW, capH) => {
       return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = totalW;
         canvas.height = totalH;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
 
         let loaded = 0;
         captures.forEach((cap) => {
@@ -137,7 +143,17 @@ async function captureFullPage() {
             if (cap.isLast) {
               const srcY = capH - (totalH - cap.scrollY);
               if (srcY > 0) {
-                ctx.drawImage(img, 0, srcY, capW, capH - srcY, 0, cap.scrollY + srcY, capW, capH - srcY);
+                ctx.drawImage(
+                  img,
+                  0,
+                  srcY,
+                  capW,
+                  capH - srcY,
+                  0,
+                  cap.scrollY + srcY,
+                  capW,
+                  capH - srcY,
+                );
               } else {
                 ctx.drawImage(img, 0, cap.scrollY);
               }
@@ -146,14 +162,14 @@ async function captureFullPage() {
             }
             loaded++;
             if (loaded === captures.length) {
-              resolve(canvas.toDataURL('image/png'));
+              resolve(canvas.toDataURL("image/png"));
             }
           };
           img.src = cap.dataUrl;
         });
       });
     },
-    args: [captures, totalW, totalH, capW, capH]
+    args: [captures, totalW, totalH, capW, capH],
   });
 
   if (stitchResult.result) {
@@ -163,8 +179,8 @@ async function captureFullPage() {
 
 // ─── Message Listener ───
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === 'captureVisibleTab') {
-    chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+  if (msg.action === "captureVisibleTab") {
+    chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
       if (chrome.runtime.lastError) {
         sendResponse({ error: chrome.runtime.lastError.message });
       } else {
@@ -174,8 +190,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
-  if (msg.action === 'captureAndOpenEditor') {
-    chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+  if (msg.action === "captureAndOpenEditor") {
+    chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
       if (chrome.runtime.lastError) {
         sendResponse({ error: chrome.runtime.lastError.message });
         return;
@@ -186,33 +202,39 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
-  if (msg.action === 'openEditor') {
+  if (msg.action === "openEditor") {
     openEditor(msg.dataUrl, msg.crop || null);
     sendResponse({ ok: true });
     return true;
   }
 
-  if (msg.action === 'captureFullPage') {
+  if (msg.action === "captureFullPage") {
     captureFullPage().then(() => sendResponse({ ok: true }));
     return true;
   }
 
-  if (msg.action === 'startElementSelector') {
+  if (msg.action === "startElementSelector") {
     (async () => {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
       if (tabs[0]?.id) {
-        await injectAndSend(tabs[0].id, { action: 'startElementSelector' });
+        await injectAndSend(tabs[0].id, { action: "startElementSelector" });
       }
       sendResponse({ ok: true });
     })();
     return true;
   }
 
-  if (msg.action === 'startRegionSelector') {
+  if (msg.action === "startRegionSelector") {
     (async () => {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
       if (tabs[0]?.id) {
-        await injectAndSend(tabs[0].id, { action: 'startRegionSelector' });
+        await injectAndSend(tabs[0].id, { action: "startRegionSelector" });
       }
       sendResponse({ ok: true });
     })();
@@ -221,7 +243,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 function captureVisibleTab() {
-  chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+  chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
     if (!chrome.runtime.lastError && dataUrl) {
       openEditor(dataUrl);
     }
@@ -229,19 +251,23 @@ function captureVisibleTab() {
 }
 
 function openEditor(dataUrl, crop) {
-  const editorUrl = chrome.runtime.getURL('editor/editor.html');
+  const editorUrl = chrome.runtime.getURL("editor/editor.html");
   // Use IndexedDB — no size quota like chrome.storage.local (10MB limit)
-  const req = indexedDB.open('PostSnapDB', 2);
+  const req = indexedDB.open("PostSnapDB", 2);
   req.onupgradeneeded = (e) => {
     const db = e.target.result;
-    if (!db.objectStoreNames.contains('pending')) {
-      db.createObjectStore('pending', { keyPath: 'key' });
+    if (!db.objectStoreNames.contains("pending")) {
+      db.createObjectStore("pending", { keyPath: "key" });
     }
   };
   req.onsuccess = () => {
     const db = req.result;
-    const tx = db.transaction('pending', 'readwrite');
-    tx.objectStore('pending').put({ key: 'screenshot', dataUrl, crop: crop || null });
+    const tx = db.transaction("pending", "readwrite");
+    tx.objectStore("pending").put({
+      key: "screenshot",
+      dataUrl,
+      crop: crop || null,
+    });
     tx.oncomplete = () => {
       chrome.tabs.create({ url: editorUrl });
     };
