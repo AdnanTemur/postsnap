@@ -4,12 +4,7 @@
   "short_name": "PostSnap",
   "version": "1.0.0",
   "description": "Capture, beautify, and share stunning screenshots. Gradient backgrounds, browser frames, code themes, and one-click export.",
-  "permissions": [
-    "activeTab",
-    "contextMenus",
-    "scripting"
-  ],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["activeTab", "contextMenus", "scripting"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
@@ -28,14 +23,6 @@
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content/selector.js"],
-      "css": ["content/selector.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "commands": {
     "take-screenshot": {
       "suggested_key": {
@@ -47,7 +34,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["editor/editor.html", "libs/*", "backgrounds/*"],
+      "resources": ["editor/editor.html"],
       "matches": ["<all_urls>"]
     }
   ]
