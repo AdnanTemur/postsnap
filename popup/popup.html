@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 300px;
+      font-family: 'Outfit', sans-serif;
+      background: #0d0d0f;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 18px 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #ff6b35, #ff3366, #8b5cf6);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+    }
+
+    .logo svg { width: 18px; height: 18px; }
+
+    .brand {
+      font-size: 16px; font-weight: 700;
+      background: linear-gradient(135deg, #ff6b35, #ff3366);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .version {
+      font-size: 10px; color: #555;
+      margin-left: auto; font-weight: 500;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,107,53,0.3), transparent);
+      margin: 14px 18px;
+    }
+
+    .capture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 18px;
+    }
+
+    .cap-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cap-btn:hover {
+      background: rgba(255,107,53,0.08);
+      border-color: rgba(255,107,53,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255,107,53,0.12);
+    }
+
+    .cap-btn:active { transform: translateY(0); }
+
+    .cap-btn .icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .cap-btn .icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .cap-btn:nth-child(1) .icon { background: linear-gradient(135deg, #ff6b35, #ff8f5e); }
+    .cap-btn:nth-child(2) .icon { background: linear-gradient(135deg, #ff3366, #ff5e8a); }
+    .cap-btn:nth-child(3) .icon { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+    .cap-btn:nth-child(4) .icon { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+
+    .cap-btn .label {
+      font-size: 11px; font-weight: 600; color: #ccc;
+    }
+
+    .cap-btn .sublabel {
+      font-size: 9px; color: #666; font-weight: 400;
+    }
+
+    .shortcut {
+      text-align: center;
+      padding: 14px 18px 14px 0;
+      font-size: 9px; color: #444;
+    }
+
+    .shortcut kbd {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 9px; color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    </div>
+    <span class="brand">PostSnap</span>
+    <span class="version">v1.0</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="capture-grid">
+    <div class="cap-btn" id="btn-viewport">
+      <div class="icon">
+        <!-- Camera/monitor icon -->
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div class="label">Viewport</div>
+      <div class="sublabel">Visible area</div>
+    </div>
+    <div class="cap-btn" id="btn-element">
+      <div class="icon">
+        <!-- Crosshair/target icon -->
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+      </div>
+      <div class="label">Element</div>
+      <div class="sublabel">Click to pick</div>
+    </div>
+    <div class="cap-btn" id="btn-region">
+      <div class="icon">
+        <!-- Crop/scissors icon -->
+        <svg viewBox="0 0 24 24"><path d="M6 2L6 6"/><path d="M6 6L18 18"/><path d="M6 22L6 18"/><path d="M6 18L18 6"/><rect x="14" y="14" width="8" height="8" rx="1" fill="none"/></svg>
+      </div>
+      <div class="label">Region</div>
+      <div class="sublabel">Drag to select</div>
+    </div>
+    <div class="cap-btn" id="btn-fullpage">
+      <div class="icon">
+        <!-- Document/page icon -->
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="label">Full Page</div>
+      <div class="sublabel">Scroll capture</div>
+    </div>
+  </div>
+
+  <div class="shortcut">
+    Quick capture: <kbd>Ctrl/Command</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

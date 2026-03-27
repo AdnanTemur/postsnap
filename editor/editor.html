@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostSnap Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-content">
+      <div class="loader-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div class="loader-text">PostSnap</div>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Main Editor -->
+  <div id="editor-view" style="display:none">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="topbar-brand">PostSnap</span>
+      </div>
+      <div class="topbar-center">
+        <button class="tab-btn active" data-tab="background">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M2 12h20"/></svg>
+          Background
+        </button>
+        <button class="tab-btn" data-tab="frame">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          Frame
+        </button>
+        <button class="tab-btn" data-tab="shadow">
+          <svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+          Shadow
+        </button>
+        <button class="tab-btn" data-tab="text">
+          <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Text
+        </button>
+        <button class="tab-btn" data-tab="code">
+          <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Code
+        </button>
+        <button class="tab-btn" data-tab="export">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-action" id="btn-copy">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+        <button class="btn-action btn-primary" id="btn-download">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="canvas-area" id="canvas-area">
+      <div class="canvas-wrapper" id="canvas-wrapper">
+        <canvas id="main-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div class="panel" id="panel">
+      <!-- Background Tab -->
+      <div class="panel-content active" data-panel="background">
+        <div class="panel-row">
+          <div class="panel-section flex-2">
+            <label class="panel-label">Gradient Presets</label>
+            <div class="gradient-grid" id="gradient-grid"></div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Custom</label>
+            <div class="color-row">
+              <input type="color" id="bg-color1" value="#ff6b35" class="color-input">
+              <span class="color-arrow">&rarr;</span>
+              <input type="color" id="bg-color2" value="#ff3366" class="color-input">
+              <select id="bg-direction" class="select-input">
+                <option value="135">Diagonal</option>
+                <option value="90">Horizontal</option>
+                <option value="180">Vertical</option>
+                <option value="45">Diagonal Up</option>
+              </select>
+            </div>
+            <div class="color-row mt-6">
+              <input type="color" id="bg-solid" value="#1a1a2e" class="color-input">
+              <button class="btn-sm" id="btn-solid">Solid</button>
+              <button class="btn-sm" id="btn-transparent">None</button>
+            </div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Padding <span id="padding-val">64</span>px</label>
+            <input type="range" id="padding-slider" min="0" max="200" value="64" class="range-input">
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame Tab -->
+      <div class="panel-content" data-panel="frame">
+        <div class="panel-row">
+          <div class="panel-section">
+            <label class="panel-label">Frame Style</label>
+            <div class="btn-grid">
+              <button class="opt-btn active" data-frame="none">None</button>
+              <button class="opt-btn" data-frame="macos-dark">macOS Dark</button>
+              <button class="opt-btn" data-frame="macos-light">macOS Light</button>
+              <button class="opt-btn" data-frame="browser-dark">Browser Dark</button>
+              <button class="opt-btn" data-frame="browser-light">Browser Light</button>
+              <button class="opt-btn" data-frame="phone">Phone</button>
+            </div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Border Radius <span id="radius-val">12</span>px</label>
+            <input type="range" id="radius-slider" min="0" max="40" value="12" class="range-input">
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Aspect Ratio</label>
+            <div class="btn-grid">
+              <button class="opt-btn active" data-aspect="free">Free</button>
+              <button class="opt-btn" data-aspect="1:1">1:1</button>
+              <button class="opt-btn" data-aspect="16:9">16:9</button>
+              <button class="opt-btn" data-aspect="4:3">4:3</button>
+              <button class="opt-btn" data-aspect="9:16">9:16</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shadow Tab -->
+      <div class="panel-content" data-panel="shadow">
+        <div class="panel-row">
+          <div class="panel-section">
+            <label class="panel-label">Preset</label>
+            <div class="btn-grid">
+              <button class="opt-btn" data-shadow="none">None</button>
+              <button class="opt-btn" data-shadow="light">Light</button>
+              <button class="opt-btn active" data-shadow="medium">Medium</button>
+              <button class="opt-btn" data-shadow="heavy">Heavy</button>
+              <button class="opt-btn" data-shadow="glow">Glow</button>
+              <button class="opt-btn" data-shadow="colored">Colored</button>
+            </div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Custom</label>
+            <div class="controls-inline">
+              <div class="ctrl">
+                <label>Blur <span id="shadow-blur-val">20</span></label>
+                <input type="range" id="shadow-blur" min="0" max="100" value="20" class="range-input">
+              </div>
+              <div class="ctrl">
+                <label>Spread <span id="shadow-spread-val">0</span></label>
+                <input type="range" id="shadow-spread" min="-20" max="40" value="0" class="range-input">
+              </div>
+              <div class="ctrl">
+                <label>Opacity <span id="shadow-opacity-val">30</span>%</label>
+                <input type="range" id="shadow-opacity" min="0" max="100" value="30" class="range-input">
+              </div>
+              <div class="ctrl">
+                <label>Color</label>
+                <input type="color" id="shadow-color" value="#000000" class="color-input">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Tab -->
+      <div class="panel-content" data-panel="text">
+        <div class="panel-row">
+          <div class="panel-section flex-2">
+            <label class="panel-label">Title</label>
+            <input type="text" id="text-title" placeholder="Add a title..." class="text-input">
+            <div class="controls-inline mt-6">
+              <div class="ctrl">
+                <label>Size <span id="text-size-val">24</span>px</label>
+                <input type="range" id="text-size" min="12" max="72" value="24" class="range-input">
+              </div>
+              <div class="ctrl">
+                <label>Color</label>
+                <input type="color" id="text-color" value="#ffffff" class="color-input">
+              </div>
+              <div class="ctrl">
+                <label>Position</label>
+                <select id="text-position" class="select-input">
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </div>
+              <div class="ctrl">
+                <label>Font</label>
+                <select id="text-font" class="select-input">
+                  <option value="Outfit">Outfit</option>
+                  <option value="JetBrains Mono">JetBrains Mono</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Impact">Impact</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Watermark</label>
+            <label class="toggle-label">
+              <input type="checkbox" id="watermark-toggle" checked> Show "Made with PostSnap"
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Tab -->
+      <div class="panel-content" data-panel="code">
+        <div class="panel-row">
+          <div class="panel-section">
+            <label class="panel-label">Syntax Theme</label>
+            <div class="btn-grid">
+              <button class="opt-btn active" data-theme="dracula">Dracula</button>
+              <button class="opt-btn" data-theme="one-dark">One Dark</button>
+              <button class="opt-btn" data-theme="monokai">Monokai</button>
+              <button class="opt-btn" data-theme="github">GitHub</button>
+              <button class="opt-btn" data-theme="nord">Nord</button>
+            </div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Font Size <span id="code-size-val">14</span>px</label>
+            <input type="range" id="code-size" min="10" max="24" value="14" class="range-input">
+          </div>
+          <div class="panel-section">
+            <label class="toggle-label">
+              <input type="checkbox" id="code-linenums" checked> Line numbers
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Tab -->
+      <div class="panel-content" data-panel="export">
+        <div class="panel-row">
+          <div class="panel-section">
+            <label class="panel-label">Format</label>
+            <div class="btn-grid">
+              <button class="opt-btn active" data-format="png">PNG</button>
+              <button class="opt-btn" data-format="jpeg">JPEG</button>
+              <button class="opt-btn" data-format="webp">WebP</button>
+            </div>
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Quality <span id="quality-val">92</span>%</label>
+            <input type="range" id="quality-slider" min="10" max="100" value="92" class="range-input">
+          </div>
+          <div class="panel-section">
+            <label class="panel-label">Scale</label>
+            <div class="btn-grid">
+              <button class="opt-btn active" data-scale="1">1x</button>
+              <button class="opt-btn" data-scale="2">2x</button>
+              <button class="opt-btn" data-scale="3">3x</button>
+            </div>
+          </div>
+          <div class="panel-section export-actions">
+            <button class="btn-export" id="btn-export-download">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+            <button class="btn-export btn-export-copy" id="btn-export-copy">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Clipboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="editor.js"></script>
+</body>
+</html>
