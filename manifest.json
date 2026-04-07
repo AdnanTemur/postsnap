@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PostSnap - Beautiful Screenshots, One Click",
   "short_name": "PostSnap",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Capture, beautify, and share stunning screenshots. Gradient backgrounds, browser frames, code themes, and one-click export.",
   "permissions": ["activeTab", "contextMenus", "scripting"],
   "action": {
